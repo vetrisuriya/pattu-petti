@@ -1,5 +1,5 @@
 /* ============================================================
-   RAGAMALIKA PLAYER
+   PATTU PETTI PLAYER
    Handles: queue building, shuffle (no repeat until the whole
    queue has played once), loop, next/prev, background rotation.
    ============================================================ */
@@ -47,9 +47,12 @@ const Player = (() => {
   async function loadBackgrounds() {
     try {
       const res = await fetch('data/backgrounds.json');
+      if (!res.ok) throw new Error(`Server responded ${res.status}`);
       allBackgrounds = await res.json();
     } catch (e) {
-      console.warn('Could not load backgrounds.json', e);
+      // Non-fatal: player still works without background rotation, just log clearly.
+      console.error('[Pattu Petti] Could not load data/backgrounds.json —', e.message,
+        '— check the file exists at that exact path in your repo.');
     }
   }
 
@@ -178,7 +181,7 @@ const Player = (() => {
 
   function recordRecentlyPlayed(song) {
     try {
-      const key = 'ragamalika_recent';
+      const key = 'pattupetti_recent';
       const list = JSON.parse(localStorage.getItem(key) || '[]');
       const filtered = list.filter(t => t !== song.url);
       filtered.unshift(song.url);
@@ -188,7 +191,7 @@ const Player = (() => {
 
   function getRecentlyPlayed() {
     try {
-      return JSON.parse(localStorage.getItem('ragamalika_recent') || '[]');
+      return JSON.parse(localStorage.getItem('pattupetti_recent') || '[]');
     } catch (e) { return []; }
   }
 

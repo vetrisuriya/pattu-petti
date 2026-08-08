@@ -1,7 +1,12 @@
-# Ragamalika
+# Pattu Petti
+
+> The web home of Pattu Petti — nostalgic Tamil, Telugu, Hindi, and English
+> music, streamed free, no login required.
 
 A private, no-login music archive. Static site, hosted free on GitHub Pages,
 media hosted free on Cloudinary. No backend, no build step — just HTML/CSS/JS.
+
+Live at: https://vetrisuriya.github.io/pattu-petti/
 
 ## How it's structured
 
@@ -49,10 +54,37 @@ so any new array you add is automatically included in the rotation.
 
 ## Deploying to GitHub Pages
 
-1. Create a new repo (suggested name: `ragamalika`).
+1. Create a new repo (suggested name: `pattu-petti` (matches your existing branding)).
 2. Push all these files to the `main` branch, at the repo root.
 3. Repo Settings → Pages → Source: `main` branch, `/ (root)`.
-4. Your site goes live at `https://yourusername.github.io/ragamalika/`.
+4. Your site goes live at `https://vetrisuriya.github.io/pattu-petti/`.
+
+## Troubleshooting: blank page / "strict-origin-when-cross-origin"
+
+That phrase by itself isn't an error — it's just the default Referrer-Policy
+label Chrome shows next to *every* network request in DevTools. If you saw
+it and the page looked broken, the real error is elsewhere. As of this
+update, the site now shows errors directly on the page instead of failing
+silently, so:
+
+1. Hard refresh the live site (`Ctrl+Shift+R` / `Cmd+Shift+R`) — GitHub
+   Pages can take 1-2 minutes to update after a push, and browsers cache
+   aggressively.
+2. If something's still wrong, the page itself will now display what
+   failed (e.g. "Couldn't load data/telugu.json").
+3. For the full technical detail, open DevTools (F12) → **Console** tab —
+   look for a red line starting with `[Pattu Petti]`.
+4. Common root causes on GitHub Pages specifically:
+   - **Folder structure not preserved.** If files were uploaded individually
+     through the GitHub web UI instead of as a full folder/zip, `data/`,
+     `css/`, and `js/` subfolders can end up missing or flattened. Check
+     your repo's file listing on GitHub matches: `index.html`, `css/style.css`,
+     `js/app.js`, `js/player.js`, `data/telugu.json`, `data/backgrounds.json`.
+   - **Wrong branch/folder selected in Pages settings.** Settings → Pages →
+     confirm source is `main` branch, `/ (root)` — not `/docs` unless your
+     files are actually inside a `docs/` folder.
+   - **Case sensitivity.** GitHub Pages is case-sensitive; `Data/Telugu.json`
+     is not the same file as `data/telugu.json`.
 
 ## Notes on what's built vs. what's still a placeholder
 

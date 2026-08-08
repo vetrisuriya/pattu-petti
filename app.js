@@ -1,5 +1,5 @@
 /* ============================================================
-   RAGAMALIKA APP
+   PATTU PETTI APP
    Hash-based router for a fully static, no-backend site.
    Routes:
      #/                      -> language selection
@@ -20,13 +20,34 @@ async function loadLanguageData(code) {
   if (dataCache[code]) return dataCache[code];
   try {
     const res = await fetch(`data/${code}.json`);
-    if (!res.ok) throw new Error('not found');
+    if (!res.ok) {
+      // File genuinely missing (e.g. language not added yet) — not an error, just empty.
+      if (res.status === 404) return null;
+      throw new Error(`Server responded ${res.status} for data/${code}.json`);
+    }
     const json = await res.json();
     dataCache[code] = json;
     return json;
   } catch (e) {
+    // Real failure (network/parse error) — surface it instead of failing silently.
+    showFatalError(`Couldn't load data/${code}.json — ${e.message}. Check the file exists at that exact path in your repo and is valid JSON.`);
     return null;
   }
+}
+
+function showFatalError(message) {
+  const app = document.getElementById('app');
+  if (app) {
+    app.innerHTML = `<div class="empty-state">
+      <span class="big">Something didn't load</span>
+      ${message}
+      <br><br>
+      <span style="font-size:0.8rem; color:var(--ivory-faint);">
+        Open your browser's DevTools (F12) → Console tab for the full technical error.
+      </span>
+    </div>`;
+  }
+  console.error('[Pattu Petti]', message);
 }
 
 function prettifyDecade(d) {
@@ -77,7 +98,7 @@ async function renderHome() {
 
   app.innerHTML = `
     <div class="hero">
-      <h1>Ragamalika <em>రాగమాలిక</em></h1>
+      <h1>Pattu Petti <em>பாட்டு பெட்டி</em></h1>
       <p>A private archive of the songs that made us pause. Pick a language to begin.</p>
     </div>
     <div class="lang-grid">${cards.join('')}</div>
@@ -109,7 +130,7 @@ async function renderDecadeGrid(langCode) {
         <span class="ticket-sub">Full Collection</span>
         <span class="ticket-count">${data.songs.length} tracks</span>
       </div>
-      <div class="ticket-stub"><span class="glyph">RAGAMALIKA</span></div>
+      <div class="ticket-stub"><span class="glyph">PATTU PETTI</span></div>
     </a>`;
 
   const decadeCards = order.map(key => `
@@ -119,7 +140,7 @@ async function renderDecadeGrid(langCode) {
         <span class="ticket-sub">${lang.name} Playlist</span>
         <span class="ticket-count">${groups[key].length} tracks</span>
       </div>
-      <div class="ticket-stub"><span class="glyph">RAGAMALIKA</span></div>
+      <div class="ticket-stub"><span class="glyph">PATTU PETTI</span></div>
     </a>`).join('');
 
   app.innerHTML = `
@@ -277,6 +298,19 @@ function route() {
 
 window.addEventListener('hashchange', route);
 window.addEventListener('DOMContentLoaded', () => {
-  Player.init();
-  route();
+  try {
+    Player.init();
+    route();
+  } catch (e) {
+    showFatalError(`App failed to start — ${e.message}`);
+  }
+});
+
+// Catches any error that slips past the try/catch above (e.g. inside async
+// code) so the page never just goes silently blank.
+window.addEventListener('error', (e) => {
+  showFatalError(`Unexpected error — ${e.message}`);
+});
+window.addEventListener('unhandledrejection', (e) => {
+  showFatalError(`Unexpected error — ${e.reason?.message || e.reason}`);
 });
